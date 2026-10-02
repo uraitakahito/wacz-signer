@@ -1,8 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
 #
 # Dependabot が読むのは **default branch (main) に置かれたこのファイル** だけ。
-# `target-branch` は「PR をどこへ出すか」を指すだけで、設定の置き場所ではない。
-# develop にだけ置いても効かないので、両方に同じものを入れてある。
+# PR も main へ出す (`target-branch` を書かなければ、default branch 宛てになる)。
 #
 # この repo は npm プロジェクトを 2 つ持つ:
 #   /            … pnpm (pnpm-lock.yaml)
@@ -14,7 +13,6 @@ updates:
   # ── アプリ本体 ──
   - package-ecosystem: npm
     directory: /
-    target-branch: develop
     schedule:
       interval: weekly
       day: monday
@@ -51,7 +49,6 @@ updates:
   # ここを 3 にすると npm だけで 1 repo 最大 6 本になり、溜まる状態を再生産する。
   - package-ecosystem: npm
     directory: /docs-site
-    target-branch: develop
     schedule:
       interval: weekly
       day: monday
@@ -71,7 +68,6 @@ updates:
   # ── GitHub Actions ──
   - package-ecosystem: github-actions
     directory: /
-    target-branch: develop
     schedule:
       interval: weekly
       day: monday
@@ -89,7 +85,6 @@ updates:
   # ── Docker base image ──
   - package-ecosystem: docker
     directory: /
-    target-branch: develop
     schedule:
       interval: weekly
       day: monday

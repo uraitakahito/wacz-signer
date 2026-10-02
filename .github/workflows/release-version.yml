@@ -8,8 +8,8 @@ name: release-version
 # test/cli.test.ts already pins `--version` == package.json == SOFTWARE. What
 # nothing checked was whether any of them match the release. This does.
 #
-# It runs on the develop → main pull request and compares its title against
-# package.json. The title is the only place the intended version exists before
+# It runs on release pull requests (the title starts with "Release") and compares
+# the title against package.json. The title is the only place the intended version exists before
 # the tag is cut: the tag lands on the merge commit, which is after the last
 # moment anything can be stopped. Checking against the tag would report the
 # mistake once it is already permanent — wacz-signer writes this string into the
@@ -25,6 +25,9 @@ permissions:
 jobs:
   version-matches-title:
     name: Release version matches package.json
+    # Feature pull requests target main too, and skip this job.
+    # startsWith() ignores case, so "Release v1.2.3" matches.
+    if: startsWith(github.event.pull_request.title, 'release')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
