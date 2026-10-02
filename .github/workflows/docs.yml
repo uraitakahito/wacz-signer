@@ -2,16 +2,16 @@ name: docs
 
 # Publish docs-site/ to GitHub Pages.
 #
-# Only on main. Pull requests get the read-only sync guard in site.yml instead —
-# building a fork's branch here would let it choose what gets served.
+# Only on a release tag (v*), so the published docs are those of a released
+# version. A push to main does not publish: main also carries changes that are
+# not released yet. The github-pages environment allows deployments from v* tags
+# only; to publish again, dispatch on a tag (gh workflow run docs.yml --ref vX.Y.Z).
+# Pull requests get the read-only sync guard in site.yml instead — building a
+# fork's branch here would let it choose what gets served.
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'docs-site/**'
-      - '.github/workflows/docs.yml'
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
