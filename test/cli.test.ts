@@ -10,7 +10,9 @@
  * that what shipped is what was tested — `bin` points at `dist/cli.js`, so a
  * source-only test would be measuring something nobody runs.
  */
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
+import { once } from "node:events";
+import { connect, createServer } from "node:net";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -268,4 +270,98 @@ describe("argument parsing the hand-rolled version got wrong", () => {
     expect(run.stdout).toContain("--signer-days");
     expect(run.stdout).not.toContain("--allow-expired");
   }, 30_000);
+});
+
+/** 空いている口を 1 つ借りる。開いて閉じるので、その間に取られる隙はあるが、試験には足りる。 */
+const freePort = async (): Promise<number> => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (address === null || typeof address === "string") throw new Error("口の番号が取れない");
+  await new Promise<void>((resolve, reject) => {
+    server.close((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+  return address.port;
+};
+
+/** TCP が繋がるか（繋がったら即切る）。127.0.0.1 なので名前は引かない。 */
+const connects = (port: number): Promise<boolean> =>
+  new Promise((resolve) => {
+    const socket = connect(port, "127.0.0.1");
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once("error", () => {
+      resolve(false);
+    });
+  });
+
+/** 条件が真になるまで 50 ms ごとに見る。期限を過ぎたら投げる。 */
+const until = async (check: () => Promise<boolean>, ms: number): Promise<void> => {
+  const deadline = Date.now() + ms;
+  while (!(await check())) {
+    if (Date.now() > deadline) throw new Error(`${String(ms)} ms 待っても条件が真にならない`);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+};
+
+/** 期限付きで待つ。期限の時計は、どちらが先でも止める。 */
+const withTimeout = async <T>(promise: Promise<T>, ms: number, what: string): Promise<T> => {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(new Error(`${what}（${String(ms)} ms）`));
+        }, ms);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+};
+
+/**
+ * serve の止め方。
+ *
+ * コンテナでは node が PID 1 で、PID 1 には既定の振る舞い（終了）の信号が届かない。handler が無いと
+ * SIGTERM を無視して猶予の後に SIGKILL で殺され、compose の down は 1 台 10 秒待つ。PID 1 の形は
+ * 手元では再現できないので、ここで見るのは「受けたら閉じて 0 で終わる」こと。handler が無いと
+ * 子プロセスは信号で死ぬ（{ code: null, signal: "SIGTERM" }）。
+ */
+describe("serve の止め方", () => {
+  it.each(["SIGTERM", "SIGINT"] as const)(
+    "%s を受けたら、受け付けを閉じて終了コード 0 で終わる",
+    async (signal) => {
+      const port = await freePort();
+      const child = spawn(
+        process.execPath,
+        [cli, "serve", "--dir", join(dir, "id"), "--host", "127.0.0.1", "--port", String(port)],
+        { cwd: root, stdio: ["ignore", "ignore", "pipe"] },
+      );
+      let stderrText = "";
+      child.stderr.on("data", (chunk: Buffer) => {
+        stderrText += chunk.toString();
+      });
+      try {
+        await until(() => connects(port), 5_000);
+        const exited = once(child, "exit");
+        child.kill(signal);
+        const [code, sig] = (await withTimeout(exited, 2_000, "終わるのを待つ")) as [
+          number | null,
+          NodeJS.Signals | null,
+        ];
+        expect({ code, sig }).toEqual({ code: 0, sig: null });
+        expect(stderrText).toContain(`${signal} を受けた`);
+      } finally {
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      }
+    },
+    15_000,
+  );
 });

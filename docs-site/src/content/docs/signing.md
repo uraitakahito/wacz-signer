@@ -67,3 +67,5 @@ $ wacz-signer serve --dir ./id --port 8080 --token "$WACZ_SIGNER_TOKEN"
 Only `/sign` is protected, matching authsign. The capture process sends a hash and gets a signature back; it never holds anything that could sign a second archive. Verification stays open because it reveals nothing that a holder of the archive does not already have.
 
 `/verify` answers **200 with `valid: false`** for an archive that does not check out, rather than a 4xx. The question was answered. A transport-level error code there would be indistinguishable from the server being down, which is a different thing entirely from an archive that fails to verify.
+
+`serve` stops on SIGTERM and SIGINT: it closes the listener, finishes the signatures in flight (idle keep-alive connections are dropped), and exits 0, so a container stop or a deployment swap does not wait on it. If closing takes more than a few seconds it gives up and exits 1. Without this, node as PID 1 would ignore the signal and be killed only when the grace period ran out.

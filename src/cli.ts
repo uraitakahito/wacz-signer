@@ -144,6 +144,12 @@ async function cmdVerify(opts: {
   exit(report.valid ? 0 : 1);
 }
 
+/**
+ * serve が信号を受けてから、閉じ切れなくても終わるまでの猶予。開いたままの接続や、固まった
+ * 処理を待ち続けて、コンテナの猶予（compose は 10 秒）に殺されるのを避ける。
+ */
+const HARD_EXIT_MS = 3_000;
+
 async function cmdServe(opts: {
   dir: string;
   port: number;
@@ -156,7 +162,7 @@ async function cmdServe(opts: {
   const onCommand = explainer(opts);
   const identity = await loadIdentity(opts.dir, onCommand);
 
-  await listen(
+  const server = await listen(
     {
       identity,
       trustRoots: [identity.rootCert],
@@ -172,7 +178,19 @@ async function cmdServe(opts: {
   stdout.write(`wacz-signer serving ${identity.domain} on http://${opts.host}:${String(opts.port)}\n`);
   stdout.write(`  POST /sign    ${opts.token === undefined ? "(open)" : "(bearer token required)"}\n`);
   stdout.write(`  POST /verify\n`);
-  // The process stays up on the listening socket; nothing more to do here.
+
+  // コンテナでは node が PID 1。PID 1 には既定の振る舞い（終了）しか持たない信号が届かないので、
+  // handler が無いと SIGTERM を無視し、猶予の後に SIGKILL で殺される。受け付けを閉じ、処理中の
+  // 署名を終えてから 0 で終わる。keep-alive で開いたままの接続は待たない。閉じ切れないときは数秒で 1。
+  // 試験は test/cli.test.ts の「serve の止め方」。
+  const stop = (signal: NodeJS.Signals): void => {
+    stderr.write(`wacz-signer: ${signal} を受けた。受け付けを閉じて終わる\n`);
+    setTimeout(() => exit(1), HARD_EXIT_MS).unref();
+    server.close(() => exit(0));
+    server.closeIdleConnections();
+  };
+  process.once("SIGTERM", stop);
+  process.once("SIGINT", stop);
 }
 
 const MARK: Record<string, string> = { ok: "ok     ", failed: "FAILED ", skipped: "skipped" };
