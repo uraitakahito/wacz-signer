@@ -71,6 +71,7 @@
     "eslint-plugin-import-x": "Import hygiene: enforces the .js extension on relative imports, which Node's ESM resolver requires at runtime. Pulls in unrs-resolver, whose native build must be allowed in pnpm-workspace.yaml.",
     "typescript": "The compiler. Also the type gate: `typecheck` covers test/, `build` narrows to src/.",
     "typescript-eslint": "The typescript-eslint preset bundle (parser + plugin + configs). eslint.config.mjs turns on strictTypeChecked and stylisticTypeChecked from it, which is why linting needs a tsconfig and is slower than a syntax-only pass.",
+    "vite": "vitest の peer。vitest 自身は ^7 を許すだけで audit の修正版 (7.3.7) を要求しないので、ここで名指して進める。外す条件: vitest が修正版以上を要求する版を出したとき (そのとき update だけで直る)。",
     "vitest": "Test runner. Pulls in esbuild, whose platform binary is installed by a postinstall — allowed explicitly in pnpm-workspace.yaml, since pnpm 11 runs no dependency lifecycle scripts by default."
   },
   "devDependencies": {
@@ -81,7 +82,8 @@
     "eslint-plugin-import-x": "^4.16.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0",
-    "vitest": "^4.1.11"
+    "vite": "^7.3.7",
+    "vitest": "^4.1.12"
   },
   "//dependencies": [
     "One, and it is not a cryptographic one.",
