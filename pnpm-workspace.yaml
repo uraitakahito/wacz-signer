@@ -20,3 +20,17 @@ allowBuilds:
 # 差分を持ち込まないため。capture-fixtures は実際に prebuild / pretypecheck / pretest /
 # prelint を持っており、同じ形になったときに事故る。
 enablePrePostScripts: true
+
+# audit から外す勧告。外すのは、上流が修正版を受け取れず、override でも越えられないものだけ。
+# 1 件ごとに、なぜ越えられないかと、外す条件を書く（capture-fixtures と同じ決まり）。
+auditConfig:
+  ignoreGhsas:
+    # minimatch: globparts の増幅による DoS。修正は 11.0.1 からで、10 系には無い。11 は名前付きの
+    # 書き出し makeRe をやめたので、override で 11 にすると eslint-plugin-import-x が読み込みで落ちる
+    # (capture-fixtures で実測。lint が "does not provide an export named 'makeRe'" で止まる)。
+    # eslint・@eslint/config-array・@typescript-eslint/typescript-estree・eslint-plugin-import-x の最新版が
+    # どれも ^10 を要求する。wacz-signer の npm の依存はすべて devDependencies で、minimatch 10 が居るのは
+    # lint の道具の中だけ。読むパターンは eslint の設定と lint の対象 (この repo の物) だけで、実行時の木には
+    # 無い (`pnpm audit --prod` は 0)。
+    # 外す条件: これらの親が ^11 を要求する版を出したとき (そのとき update で直る)。
+    - GHSA-g3hv-75wg-m249
