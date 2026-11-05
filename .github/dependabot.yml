@@ -93,3 +93,10 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - docker
+    ignore:
+      # Node のメジャーは Dependabot に上げさせない。
+      #
+      # PR は FROM だけを書き換えるので、.nvmrc で走る CI と image の Node が食い違う
+      # （2026-08-14 の #26 がそうだった）。上げるときは .nvmrc と FROM を 1 つの PR で直す。
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]

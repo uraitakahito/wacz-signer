@@ -3,7 +3,7 @@ title: Quickstart
 description: Issue an identity, sign a datapackage.json, and verify the result.
 ---
 
-wacz-signer needs `openssl` on `PATH` and Node 24. Nothing else.
+wacz-signer needs `openssl` on `PATH` and Node 26. Nothing else.
 
 ```console
 $ openssl version
