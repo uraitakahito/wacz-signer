@@ -19,7 +19,7 @@
  * `.github/workflows/release-version.yml` closes that gap: it compares the
  * release PR's title against package.json, before the tag exists.
  */
-export const VERSION = "0.8.3";
+export const VERSION = "0.9.0";
 
 /** The `software` field of a wacz-auth signedData. */
 export const SOFTWARE = `wacz-signer/${VERSION}`;
