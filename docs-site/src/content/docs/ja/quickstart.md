@@ -3,7 +3,7 @@ title: Quickstart
 description: 身元を発行し、datapackage.json に署名し、結果を検証する。
 ---
 
-必要なのは `PATH` 上の `openssl` と Node 24 だけです。
+必要なのは `PATH` 上の `openssl` と Node 26 だけです。
 
 ```console
 $ openssl version

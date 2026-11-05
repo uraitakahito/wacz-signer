@@ -8,7 +8,7 @@ $ pnpm install
 $ pnpm run check   # audit・typecheck・lint・test
 ```
 
-必要なのは Node 24・pnpm・`PATH` 上の `openssl` です。`package.json` の実行時依存はコマンドライン解析の commander 1 つで、ほかはすべて devDependencies です。暗号処理を npm から持ってくることはないので、実際に効いてくる要件は `PATH` 上の openssl です。
+必要なのは Node 26・pnpm・`PATH` 上の `openssl` です。`package.json` の実行時依存はコマンドライン解析の commander 1 つで、ほかはすべて devDependencies です。暗号処理を npm から持ってくることはないので、実際に効いてくる要件は `PATH` 上の openssl です。
 
 `docs-site/` は独自の lockfile を持つ別の npm プロジェクトなので、`npm ci --prefix docs-site` で入れます。下の `site:*` スクリプトが中に入って実行してくれます。
 

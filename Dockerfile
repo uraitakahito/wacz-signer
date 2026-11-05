@@ -44,9 +44,9 @@ FROM node:26-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
-# node:24-bookworm-slim does NOT ship the openssl CLI — measured, not assumed:
+# node:26-bookworm-slim does NOT ship the openssl CLI — measured, not assumed:
 #
-#   $ container run --rm node:24-bookworm-slim command -v openssl
+#   $ container run --rm node:26-bookworm-slim command -v openssl
 #   sh: 1: openssl: not found
 #
 # Node links against libssl, which is a different thing. wacz-signer shells out for
