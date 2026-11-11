@@ -272,12 +272,12 @@ describe("argument parsing the hand-rolled version got wrong", () => {
   }, 30_000);
 });
 
-/** 空いている口を 1 つ借りる。開いて閉じるので、その間に取られる隙はあるが、試験には足りる。 */
+/** 空いているポートを 1 つ借りる。開いて閉じるので、その間に取られる隙はあるが、試験には足りる。 */
 const freePort = async (): Promise<number> => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
-  if (address === null || typeof address === "string") throw new Error("口の番号が取れない");
+  if (address === null || typeof address === "string") throw new Error("ポートの番号が取れない");
   await new Promise<void>((resolve, reject) => {
     server.close((err) => {
       if (err) reject(err);
