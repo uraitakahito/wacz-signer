@@ -1,11 +1,14 @@
 /**
- * The private CA, the signing identity, and the timestamp authority.
+ * The private CA and the signing identity.
  *
  * Everything here is deliberately local. A public CA cannot issue a
- * certificate that expired yesterday, or one for a domain nobody owns, and a
- * public timestamp authority will not report a time of its caller's choosing —
- * which makes the failure cases impossible to exercise against them. Those
- * cases are the ones worth testing, so signer issues its own.
+ * certificate that expired yesterday, or one for a domain nobody owns — which
+ * makes the failure cases impossible to exercise against one. Those cases are
+ * the ones worth testing, so signer issues its own.
+ *
+ * The timestamp authority is not here. signer ran its own until v0.5.0 and now
+ * asks an external RFC 3161 authority for the timestamp (src/sign.ts; the
+ * reason is in src/index.ts).
  *
  * Let's Encrypt's staging environment is not an alternative: its roots are
  * absent from every trust store on purpose, so signatures made under it fail
@@ -30,7 +33,7 @@ export interface InitOptions {
    * a verifier has to keep handling.
    */
   signerDays?: number;
-  /** Validity of the CA and TSA certificates, in days. */
+  /** Validity of the CA certificate, in days. */
   caDays?: number;
   onCommand?: (commandLine: string) => void;
 }

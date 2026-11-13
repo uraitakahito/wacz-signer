@@ -3,7 +3,7 @@ title: wacz-signer
 description: openssl だけで動く、ローカルの wacz-auth 署名スタンドイン。
 ---
 
-wacz-signer は [wacz-auth](https://specs.webrecorder.net/wacz-auth/0.1.0/) 署名サービスのローカル代替です。自前の CA・署名用証明書・[RFC 3161](https://www.rfc-editor.org/rfc/rfc3161) タイムスタンプ局を発行し、WACZ の `datapackage-digest.json` に入る `signedData` を作ります。
+wacz-signer は [wacz-auth](https://specs.webrecorder.net/wacz-auth/0.1.0/) 署名サービスのローカル代替です。自前の CA と署名用証明書を発行し、タイムスタンプは利用者が選ぶ [RFC 3161](https://www.rfc-editor.org/rfc/rfc3161) の認証局に求めて、WACZ の `datapackage-digest.json` に入る `signedData` を作ります。
 
 **暗号処理はすべて `openssl` の呼び出しです。** wacz-signer が受け持つのは JSON・一時ファイル・プロセス起動だけです。暗号処理を npm から持ってくることはありません。実行時依存はコマンドラインを解析する [commander](https://www.npmjs.com/package/commander) 1 つだけです。
 
