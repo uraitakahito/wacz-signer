@@ -5,7 +5,7 @@
   ],
   "name": "wacz-signer",
   "version": "0.9.0",
-  "description": "Local wacz-auth signing stand-in — a private CA, an RFC 3161 timestamp authority, and a signer, all driven by openssl.",
+  "description": "Local wacz-auth signing stand-in — a private CA and a signer driven by openssl, with the timestamp requested from an RFC 3161 authority of your choosing.",
   "type": "module",
   "exports": {
     ".": {
