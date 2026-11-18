@@ -1,17 +1,14 @@
 name: audit
 
 # Known-vulnerability gate for both lockfiles: pnpm-lock.yaml (the package)
-# and docs-site/package-lock.json (npm — `pnpm audit` never reads it). The
+# and docs-site/package-lock.json (npm — `pnpm audit` never reads it;
+# npm audit has no ignore list, so it runs through scripts/npm-audit.mjs). The
 # command is package.json's `audit`, which is also the first step of `check`.
 #
 # Advisories are published independently of our pull requests, so this also
 # runs every day. On 2026-09-13 vitest carried a moderate advisory and the
 # docs-site lockfile four more, astro's critical one among them: Dependabot
 # alerts were open, fix PRs sat unmerged, and nothing anywhere was red.
-#
-# `schedule` and `workflow_dispatch` only run workflows that exist on the
-# default branch (main). Until this file is released to main, only
-# pull_request and push apply.
 on:
   pull_request:
   push:
